@@ -60,9 +60,10 @@ int main()
     // build and compile our shader program
     // ------------------------------------
     // vertex shader
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER); // NOTE: creates a shader object handle on the CPU.
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // NOTE: tells OpenGL what code this shader will use.
+    glCompileShader(vertexShader); // NOTE: compiles the shader. Compilation happens mostly on the GPU driver side. The GPU now knows what instructions this shader will run, but it’s not “active” yet.
+  
     // check for shader compile errors
     int success;
     char infoLog[512];
@@ -72,10 +73,12 @@ int main()
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
+
     // fragment shader
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // NOTE: creates a shader object handle on the CPU.
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL); // NOTE: tells OpenGL what code this shader will use.
+    glCompileShader(fragmentShader); // NOTE: compiles the shader. Compilation happens mostly on the GPU driver side. The GPU now knows what instructions this shader will run, but it’s not “active” yet.
+
     // check for shader compile errors
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success)
@@ -87,7 +90,7 @@ int main()
     unsigned int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    glLinkProgram(shaderProgram); // NOTE: combines multiple shaders into a single GPU program.
     // check for linking errors
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
@@ -153,7 +156,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // draw our first triangle
-        glUseProgram(shaderProgram);
+        glUseProgram(shaderProgram); // NOTE: At this point the shader program exists on the GPU.
         glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
