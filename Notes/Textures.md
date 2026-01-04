@@ -2,6 +2,8 @@
 
 Vertices carry more than positions—they carry **attributes** like texture coordinates `(u, v)`. These attributes travel **together** with positions through the pipeline.
 
+The uv cords help in mapping the texture to the triangle
+
 * Vertex shader: computes `gl_Position` (clip → NDC) and passes `u, v` along.
 * Rasterization: generates fragments inside triangles, using **barycentric coordinates** to interpolate all vertex attributes—including texture coordinates.
 
