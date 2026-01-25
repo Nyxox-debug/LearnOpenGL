@@ -35,5 +35,3 @@ This marks a key step in the journey—from basic primitives to real assets, mes
 
 This isn’t a polished engine or framework.
 It’s a learning log: experiments, mistakes, fixes, and gradual understanding built while working through modern OpenGL.
-
----
