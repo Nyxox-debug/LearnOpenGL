@@ -27,3 +27,7 @@ Switch branches depending on what concept you’re exploring or reviewing.
 
 This isn’t a polished engine or framework.
 It’s a learning log—experiments, mistakes, fixes, and incremental understanding while working through modern OpenGL.
+
+> It's not easy but I did go through it, heres something that you can be able to achive when following learnOpengl.com
+
+![Model Image](docs/ModelLoading.png)
