@@ -20,8 +20,11 @@ find_package(OpenGL REQUIRED)
 # Find GLFW
 find_package(glfw3 3.3 REQUIRED)
 
+# Assimp
+find_package(assimp REQUIRED)
+
 # Add the executable
 add_executable(app main.cpp glad.c stb_img.cpp)
 
 # Link libraries
-target_link_libraries(app PRIVATE glfw OpenGL::GL dl)
+target_link_libraries(app PRIVATE glfw OpenGL::GL dl assimp::assimp)

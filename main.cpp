@@ -1,12 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb_image.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "camera.h"
+#include "model.h"
 #include "shader_m.h"
 
 #include <iostream>
@@ -29,9 +29,6 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-// lighting
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main() {
   // glfw: initialize and configure
@@ -69,63 +66,24 @@ int main() {
     return -1;
   }
 
+  // tell stb_image.h to flip loaded texture's on the y-axis (before loading
+  // model).
+  stbi_set_flip_vertically_on_load(true);
+
   // configure global opengl state
   // -----------------------------
   glEnable(GL_DEPTH_TEST);
 
-  // build and compile our shader zprogram
-  // ------------------------------------
-  Shader lightingShader("shaders/1.colors.vs", "shaders/1.colors.fs");
-  Shader lightCubeShader("shaders/1.light_cube.vs", "shaders/1.light_cube.fs");
+  // build and compile shaders
+  // -------------------------
+  Shader ourShader("shaders/1.model_loading.vs", "shaders/1.model_loading.fs");
 
-  // set up vertex data (and buffer(s)) and configure vertex attributes
-  // ------------------------------------------------------------------
-  float vertices[] = {
-      -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f,
-      0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
+  // load models
+  // -----------
+  Model ourModel("resources/objects/backpack/backpack.obj");
 
-      -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,
-
-      -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
-      -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,
-
-      0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f,
-      0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
-
-      -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,
-      0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f,
-
-      -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f,
-  };
-  // first, configure the cube's VAO (and VBO)
-  unsigned int VBO, cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
-  glGenBuffers(1, &VBO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindVertexArray(cubeVAO);
-
-  // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
-  // second, configure the light's VAO (VBO stays the same; the vertices are the
-  // same for the light object which is also a 3D cube)
-  unsigned int lightCubeVAO;
-  glGenVertexArrays(1, &lightCubeVAO);
-  glBindVertexArray(lightCubeVAO);
-
-  // we only need to bind to the VBO (to link it with glVertexAttribPointer), no
-  // need to fill it; the VBO's data already contains all we need (it's already
-  // bound, but we do it again for educational purposes)
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
+  // draw in wireframe
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // render loop
   // -----------
@@ -142,41 +100,33 @@ int main() {
 
     // render
     // ------
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // be sure to activate shader when setting uniforms/drawing objects
-    lightingShader.use();
-    lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    // don't forget to enable shader before setting uniforms
+    ourShader.use();
 
     // view/projection transformations
     glm::mat4 projection =
         glm::perspective(glm::radians(camera.Zoom),
                          (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
-    lightingShader.setMat4("projection", projection);
-    lightingShader.setMat4("view", view);
+    ourShader.setMat4("projection", projection);
+    ourShader.setMat4("view", view);
 
-    // world transformation
+    // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
-    lightingShader.setMat4("model", model);
-
-    // render the cube
-    glBindVertexArray(cubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    // also draw the lamp object
-    lightCubeShader.use();
-    lightCubeShader.setMat4("projection", projection);
-    lightCubeShader.setMat4("view", view);
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-    lightCubeShader.setMat4("model", model);
-
-    glBindVertexArray(lightCubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    model = glm::translate(
+        model,
+        glm::vec3(
+            0.0f, 0.0f,
+            0.0f)); // translate it down so it's at the center of the scene
+    model = glm::scale(
+        model,
+        glm::vec3(1.0f, 1.0f,
+                  1.0f)); // it's a bit too big for our scene, so scale it down
+    ourShader.setMat4("model", model);
+    ourModel.Draw(ourShader);
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
@@ -184,12 +134,6 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-
-  // optional: de-allocate all resources once they've outlived their purpose:
-  // ------------------------------------------------------------------------
-  glDeleteVertexArrays(1, &cubeVAO);
-  glDeleteVertexArrays(1, &lightCubeVAO);
-  glDeleteBuffers(1, &VBO);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
