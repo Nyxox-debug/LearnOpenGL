@@ -46,7 +46,7 @@ int main() {
 
   // build and compile our shader zprogram
   // ------------------------------------
-  Shader ourShader("shaders/4.1.texture.vs", "shaders/4.1.texture.fs");
+  Shader ourShader("../shaders/4.1.texture.vs", "../shaders/4.1.texture.fs");
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
