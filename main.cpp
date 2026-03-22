@@ -57,8 +57,8 @@ int main() {
   //
   // /036   6.3.coordinate_system.fs
   // /033   6.3.coordinate_system.vs
-  Shader ourShader("shaders/6.3.coordinate_system.vs",
-                   "shaders/6.3.coordinate_system.fs");
+  Shader ourShader("../shaders/6.3.coordinate_system.vs",
+                   "../shaders/6.3.coordinate_system.fs");
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
