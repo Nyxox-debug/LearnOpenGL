@@ -75,8 +75,8 @@ int main() {
   //
   // /029   7.4.camera_class.fs
   // /033   7.4.camera_class.vs
-  Shader ourShader("shaders/7.4.camera_class.vs",
-                   "shaders/7.4.camera_class.fs");
+  Shader ourShader("../shaders/7.4.camera_class.vs",
+                   "../shaders/7.4.camera_class.fs");
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
